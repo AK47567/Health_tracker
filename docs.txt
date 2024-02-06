@@ -1,0 +1,3760 @@
+{
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json",
+    "image/png"
+  ],
+  "schemes": [
+    "https"
+  ],
+  "swagger": "2.0",
+  "info": {
+    "description": "A simple API allowing organizations to view biometric, sleep and\nworkout data from Biostrap users.\n\n# Introduction\n\nThe Biostrap developer portal allows developers to create applications that take advantage of the Biostrap devices and the data they record.\nDevelopers have the ability to access data stored in the Biostrap app for users who gave them prior consent, and to integrate them into their services.\n\n# Getting Started\n\nThere are two ways to access the Biostrap API, an application can be created with OAuth2 access to the API,\nthe end user for your application must login and give explicit permission to share his data.\nThe second option is to request access as Biostrap organization, with the organization API token you can get, create, and list users information within the organization.\n\n## Create an OAuth2 Application\n\nThe feature can only be accessed by users with the developer feature enabled, if you are not yet a developer contact the sales and support team to request access.\n\nIf you are a Biostrap developer, the API only requires you to register your application in the [Biostrap Web Dashboard](https://app.biostrap.com/).\nGo to the developers menu in the side menu and follow the steps to create a new application, the credentials to complete the OAuth2 authentication will be generated.\n\n## Create an API Token Application\n\nThe feature can only be accessed by organization administrators with the developer feature enabled, if you are not yet a developer contact the sales and support team to request access.\n\nIf you are a Biostrap Developer with organization access, you can create an API token from the organization dashboard in the [Biostrap Web Dashboard](https://app.biostrap.com/).\nGo to the developers menu in the side menu and follow the steps to create a new API secret token.",
+    "title": "Biostrap Public API",
+    "contact": {
+      "name": "Developer contact",
+      "email": "developers@biostrap.com"
+    },
+    "version": "1.3.1",
+    "x-logo": {
+      "url": "/static/logo_heart_on_black.png",
+      "altText": "Biostrap logo"
+    }
+  },
+  "host": "api-beta.biostrap.com",
+  "basePath": "/v1",
+  "paths": {
+    "/activities": {
+      "get": {
+        "description": "Returns paginated workout stats.",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Activities"
+        ],
+        "summary": "Get User Activities",
+        "operationId": "getActivities",
+        "parameters": [
+          {
+            "type": "integer",
+            "format": "int64",
+            "x-go-name": "LastTimestamp",
+            "description": "Last timestamp (with millisecond precision) of previous\npage (or 0 if first page).",
+            "name": "last-timestamp",
+            "in": "query",
+            "required": true
+          },
+          {
+            "maximum": 50,
+            "type": "integer",
+            "format": "int64",
+            "x-go-name": "Limit",
+            "description": "Maximum amount of results per page.",
+            "name": "limit",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "x-go-name": "UserID",
+            "description": "This parameter is required for Organization (API Key) requests,\nthe user_id is implicit in OAuth2 user requests",
+            "name": "user_id",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/activitiesResponse"
+          },
+          "400": {
+            "$ref": "#/responses/activitiesParameterErrorResponse"
+          }
+        }
+      }
+    },
+    "/biometrics": {
+      "get": {
+        "description": "Returns paginated biometrics.",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Biometrics"
+        ],
+        "summary": "Get User Biometrics",
+        "operationId": "getBiometrics",
+        "parameters": [
+          {
+            "type": "integer",
+            "format": "int64",
+            "x-go-name": "LastTimestamp",
+            "description": "Last timestamp (with millisecond precision) of previous\npage (or 0 if first page).",
+            "name": "last-timestamp",
+            "in": "query",
+            "required": true
+          },
+          {
+            "maximum": 50,
+            "type": "integer",
+            "format": "int64",
+            "x-go-name": "Limit",
+            "description": "Maximum amount of results per page.",
+            "name": "limit",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "x-go-name": "UserID",
+            "description": "This parameter is required for Organization (API Key) requests,\nthe user_id is implicit in OAuth2 user requests",
+            "name": "user_id",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/biometricsResponse"
+          },
+          "400": {
+            "$ref": "#/responses/genericParameterErrorResponse"
+          }
+        }
+      }
+    },
+    "/calorie/details": {
+      "get": {
+        "description": "Returns user calorie detail with daily, weekly, monthly or yearly granularity\nbased on query parameter field. No pagination is involved.",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Calories"
+        ],
+        "summary": "Get User Calorie Details With Granularity",
+        "operationId": "getCalorieDetails",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "UserID",
+            "description": "This parameter is required for Organization (API Key) requests,\nthe user_id is implicit in OAuth2 user requests",
+            "name": "user_id",
+            "in": "query"
+          },
+          {
+            "type": "integer",
+            "format": "int32",
+            "example": -420,
+            "x-go-name": "UserTimezoneOffsetInMins",
+            "description": "UserTimezoneOffsetInMins is used to find the user's resting calories for the\ncurrent day if this falls in the requested date range.\nIf this value is sent as 0 or not sent, in that case the resting calories\nfor the current day will get calculated based on the GMT timezone.\n\nNOTE: this field is only required when the provided date is equal to the current dayy\nand if it is not sent, the only issue will be with the resting calories calcuation\nof the current day.\n\nFor eg: -420 for -07:00, i.e 7 hour west of GMT, in other words, Pacific Time",
+            "name": "user_timezone_offset_in_mins",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "example": "2021-07-12",
+            "x-go-name": "Date",
+            "description": "Date in YYYYY-MM-DD format (eg: 2021-07-12 for July 12, 2021) for the calorie details,\n\nif granularity=day, it return calories for the given date.\n\nif graunalarity>day, it returns calorie details in a date range with the end date being this given date.",
+            "name": "date",
+            "in": "query",
+            "required": true
+          },
+          {
+            "enum": [
+              "day",
+              "week",
+              "month",
+              "year"
+            ],
+            "type": "string",
+            "example": "week",
+            "x-go-name": "Granularity",
+            "description": "Granularity of Calorie details,\npossible values = [day, week, month, year]\n\nif granularity=day, it returns calorie details for the given date.\n\nif granularity=week or granularity=month, it returns calorie details in a date range\nwith end date = given date and start date = <6, 29> days in the past from the end date (i.e the given date)\nwhich is a total of <7, 30> days of data for granularity = <week, month> respectively.\n\nif granularity=year, it returns monthly calorie details for the last 12 months.",
+            "name": "granularity",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/calorieDetailsResponse"
+          },
+          "400": {
+            "$ref": "#/responses/calorieDetailsParameterErrorResponse"
+          }
+        }
+      }
+    },
+    "/device-info": {
+      "get": {
+        "description": "Returns device information for all the devices the user has linked to their account.",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "DeviceInformation"
+        ],
+        "summary": "Get User's Devices Information",
+        "operationId": "getUserDeviceInfo",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "UserID",
+            "description": "This parameter is required for Organization (API Key) requests,\nthe user_id is implicit in OAuth2 user requests",
+            "name": "user_id",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/userDeviceInfoResponse"
+          },
+          "400": {
+            "$ref": "#/responses/genericParameterErrorResponse"
+          }
+        }
+      }
+    },
+    "/insights": {
+      "get": {
+        "description": "Returns insights for a given day.",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Insights"
+        ],
+        "summary": "Get User Insights",
+        "operationId": "getInsights",
+        "parameters": [
+          {
+            "type": "string",
+            "example": "2018-10-24",
+            "x-go-name": "Date",
+            "description": "The date to filter with, in ISO 8601 format.",
+            "name": "date",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "x-go-name": "UserID",
+            "description": "This parameter is required for Organization (API Key) requests,\nthe user_id is implicit in OAuth2 user requests",
+            "name": "user_id",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/insightsResponse"
+          },
+          "400": {
+            "$ref": "#/responses/genericParameterErrorResponse"
+          }
+        }
+      }
+    },
+    "/monitoring": {
+      "get": {
+        "description": "Returns a list of users you monitor and their information.\nIf you are using the API Key for organizations, only anonymous data could be returned by this endpoint",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Monitoring"
+        ],
+        "summary": "Get User Monitoring Information",
+        "operationId": "getMonitoringInfo",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "UserID",
+            "description": "This parameter is required for Organization (API Key) requests,\nthe user_id is implicit in OAuth2 user requests",
+            "name": "user_id",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/monitoringInfoResponse"
+          }
+        }
+      }
+    },
+    "/organizations/data-download/raw/send-request": {
+      "post": {
+        "description": "This request can be used to download device sensor data for specified users for a given time range\nof an organization.\nThis is an asynchronous call that triggers a data download job request.\nThe success or failure of the job request will be delivered to the specified target email as part of the request api\nIf successful, the email will contain a downloadable url link to a zipped file containing the sensor data.\nThe downloadable url link is only valid for 5 hours after that the link becomes invalid.\nYou can only send download request simultaneously for 10 users max and a 1 week time range",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Organizations"
+        ],
+        "summary": "Initiate a raw data download request.",
+        "operationId": "requestRawDataDownload",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "TargetEmail",
+            "description": "TargetEmail is the email address to which the success/failure of the download\njob request is sent along with the actual url link to download the data from.",
+            "name": "target_email",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "example": "2022-07-15T02:34:51-06:30",
+            "x-go-name": "StartTimeRFC3339",
+            "description": "StartTimeRFC3339 is the time range to download the data for, in RFC339 format.",
+            "name": "start_time",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "example": "2022-07-15T18:34:51-06:30",
+            "x-go-name": "EndTimeRFC3339",
+            "description": "EndTimeRFC3339 is the end of the time range to download the data for, in RFC339 format.",
+            "name": "end_time",
+            "in": "query",
+            "required": true
+          },
+          {
+            "maximum": 10,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "abcdefgh123456789",
+              "pqrstubwx987654321"
+            ],
+            "x-go-name": "UserIDs",
+            "description": "UserIDs is the list of user ID strings to download the data for.",
+            "name": "user_ids",
+            "in": "query",
+            "required": true
+          },
+          {
+            "enum": [
+              "accel",
+              "gyro",
+              "ppg"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": "[accel,ppg]",
+            "x-go-name": "DataToDownload",
+            "description": "DataToDownload is a list of string enums indicating the type of data to download.\n\nPossible values are [\"accel\", \"gyro\", \"ppg\"] for\naccelerometer, gyroscope, and ppg waveform data, respectively.",
+            "name": "data_to_download",
+            "in": "query",
+            "required": true
+          },
+          {
+            "enum": [
+              "csv",
+              "parquet"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": "[csv,parquet]",
+            "x-go-name": "OutputFileFormats",
+            "description": "OutputFileFormats is a list of string enums indicating the file formats in which the data download file will be sent as.\n\nPossible values are [\"csv\", \"parquet\"]\nNOTE: parquet files could be 2 to -10 times smaller than csv files.",
+            "name": "output_file_formats",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "boolean",
+            "x-go-name": "AnonymizeIDs",
+            "description": "AnonymizeIDs is a boolean flag which determines what user label is used\nWhere True means biostrap pseudo-random internal user identifier\nFalse means Biostrap email ID (does not need to be an email, can be assigned a custom string ID on account creation)\nNOTE: Default is False",
+            "name": "anonymize_ids",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/requestRawDataDownloadResponse"
+          },
+          "400": {
+            "$ref": "#/responses/genericParameterErrorResponse"
+          }
+        }
+      }
+    },
+    "/organizations/invite-user": {
+      "post": {
+        "description": "Send an invitation to a user to join your organization.\n\nValid only with Organization API Key authentication mode.",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Organizations"
+        ],
+        "summary": "Invite Users",
+        "operationId": "postInviteUser",
+        "parameters": [
+          {
+            "name": "Body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/SendInvitationRequestBody"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/sendInvitationResponse"
+          }
+        }
+      }
+    },
+    "/organizations/job-status": {
+      "get": {
+        "description": "Fetch the latest status of the Job",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Organizations"
+        ],
+        "operationId": "getJobStatus",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "JobID",
+            "description": "JobID is the job_id for which the latest status\nis being fetched for.",
+            "name": "job_id",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/jobStatusResponse"
+          },
+          "400": {
+            "$ref": "#/responses/genericParameterErrorResponse"
+          }
+        }
+      }
+    },
+    "/organizations/login-qr-code": {
+      "post": {
+        "description": "Request a qr code to login a user with an encapsulated token.\nIt will return a PNG Image as part of the response.\nContent-Type of the response will be image/png\nContent-Length will be the size of the bytes of the png image\n\nValid only with Organization API Key authentication mode",
+        "produces": [
+          "image/png"
+        ],
+        "tags": [
+          "Organizations"
+        ],
+        "summary": "Request Login QR Code for Organization User",
+        "operationId": "postLoginQRCode",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "EmailOrAccountID",
+            "description": "EmailOrAccountID is the unique identifier used to create/register a user into\nbiostrap system.",
+            "name": "email_or_account_id",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "x-go-name": "Password",
+            "description": "Password is the password used to create/register a user into\nbiostrap system.",
+            "name": "password",
+            "in": "query",
+            "required": true
+          },
+          {
+            "enum": [
+              "biostrap",
+              "vitalscience"
+            ],
+            "type": "string",
+            "example": "biostrap",
+            "x-go-name": "AppSource",
+            "description": "The app_source if provided will make sure the login token is sent for\nlogging into the correct app.\nIf not provided, it will default to \"biostrap\"\nPossible values are: Please contact biostrap admin to know what your app's value would be",
+            "name": "app_source",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/postLoginQRCodeResponse"
+          }
+        }
+      }
+    },
+    "/organizations/login-tokens": {
+      "post": {
+        "description": "Request a token to login a user with a deep link.\n\nValid only with Organization API Key authentication mode",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Organizations"
+        ],
+        "summary": "Request Login Token for Organization User",
+        "operationId": "postLoginToken",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "Email",
+            "description": "email is the unique identifier user to create/register a user into\nbiostrap system.",
+            "name": "email",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "x-go-name": "Password",
+            "description": "password is the password used to create/register a user into\nbiostrap system.",
+            "name": "password",
+            "in": "query",
+            "required": true
+          },
+          {
+            "enum": [
+              "biostrap",
+              "vitalscience"
+            ],
+            "type": "string",
+            "example": "biostrap",
+            "x-go-name": "AppSource",
+            "description": "The app_source if provided will make sure the login token is sent for\nlogging into the correct app.\nIf not provided, it will default to \"biostrap\"\nPossible values are: Please contact biostrap admin to know what your app's value would be",
+            "name": "app_source",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/requestLoginTokenResponse"
+          }
+        }
+      }
+    },
+    "/organizations/sign-user-up": {
+      "post": {
+        "description": "Create a user that will be part of the organization.\n\nValid only with Organization API Key authentication mode.",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Organizations"
+        ],
+        "summary": "SignUp Organization User",
+        "operationId": "postSignUpOrganizationUser",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "Email",
+            "name": "email",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "x-go-name": "Password",
+            "name": "password",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "x-go-name": "RepeatPassword",
+            "name": "repeat_password",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "x-go-name": "Name",
+            "name": "name",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "x-go-name": "Birthday",
+            "name": "birthday",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "x-go-name": "Gender",
+            "name": "gender",
+            "in": "query"
+          },
+          {
+            "type": "boolean",
+            "x-go-name": "PrefersImperialUnits",
+            "name": "prefers_imperial_units",
+            "in": "query"
+          },
+          {
+            "type": "number",
+            "format": "float",
+            "x-go-name": "Height",
+            "name": "height",
+            "in": "query"
+          },
+          {
+            "type": "number",
+            "format": "float",
+            "x-go-name": "Weight",
+            "name": "weight",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "x-go-name": "CityCountry",
+            "name": "city_country",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "x-go-name": "PhoneNumber",
+            "name": "phone_number",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/registerOrganizationUserResponse"
+          }
+        }
+      }
+    },
+    "/organizations/user-device-lock": {
+      "post": {
+        "description": "If device is already locked to another user, it will return a\nstatus=failed and status_message = \"device is locked to another user\" in the response.\nIf device is successfully locked or unlocked from a user, it will return\nstatus=success in the response.\n\nValid only with Organization API Key authentication mode",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Organizations"
+        ],
+        "summary": "Lock or Unlock Device to an Organization User",
+        "operationId": "postLockUnlockDeviceToUser",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "UserID",
+            "description": "UserID of the Organization User",
+            "name": "user_id",
+            "in": "query",
+            "required": true
+          },
+          {
+            "enum": [
+              "dt_biostrap_wristband",
+              "dt_biostrap_shoepod"
+            ],
+            "type": "string",
+            "example": "dt_biostrap_wristband",
+            "x-go-name": "DeviceType",
+            "description": "DeviceType is the type of the device.\n\nPossible device type strings are [\"dt_biostrap_wristband\", \"dt_biostrap_shoepod\"]",
+            "name": "device_type",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "example": "62134192413234",
+            "x-go-name": "DeviceMacAddressOrIDEncoded",
+            "description": "DeviceMacAddressOrIDEncoded is the encoded Mac Address of the device or the encoded Device ID of the user.\n\nIn most general cases, it will be an encoded Mac Address that you receive\neither by calling a different API or by scanning the biostrap devices\nwhich will have physical barcaode labeled on the device.",
+            "name": "device_mac_address_or_id_encoded",
+            "in": "query",
+            "required": true
+          },
+          {
+            "enum": [
+              "lock",
+              "unlock"
+            ],
+            "type": "string",
+            "example": "lock",
+            "x-go-name": "Operation",
+            "description": "Operation is the operation of the association requested.\n\nPossible values are [\"lock\", \"unlock\"]\nif operation=lock, lock the provided device_type, device_mac_address_or_id to the user_id\nif operation=unlock, unlock the provided device_type, device_mac_address_or_id from the user_id",
+            "name": "operation",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/postLockUnlockDeviceToUserResponse"
+          }
+        }
+      }
+    },
+    "/organizations/users": {
+      "get": {
+        "description": "Find members within the organization,\nIf the user was not found or is not part of the organization a 404 will be returned.\n\nValid only with Organization API Key authentication mode.",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Organizations"
+        ],
+        "summary": "Get Organization Users",
+        "operationId": "getOrganizationUsers",
+        "parameters": [
+          {
+            "minimum": 1,
+            "type": "integer",
+            "format": "int64",
+            "x-go-name": "Page",
+            "description": "Page to request from the total list",
+            "name": "page",
+            "in": "query",
+            "required": true
+          },
+          {
+            "maximum": 100,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int64",
+            "x-go-name": "ItemsPerPage",
+            "description": "Items per page",
+            "name": "items_per_page",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "x-go-name": "SearchPattern",
+            "description": "Query to perform within the list, can be an email or the name of the user.",
+            "name": "q",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/userListResponse"
+          }
+        }
+      }
+    },
+    "/scores": {
+      "get": {
+        "description": "Returns the scores shown at the top of the mobile app for a given day.",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Scores"
+        ],
+        "summary": "Get User Scores",
+        "operationId": "getScores",
+        "parameters": [
+          {
+            "type": "string",
+            "example": "2018-10-24",
+            "x-go-name": "Date",
+            "description": "The date to filter with, in ISO 8601 format.",
+            "name": "date",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "x-go-name": "UserID",
+            "description": "This parameter is required for Organization (API Key) requests,\nthe user_id is implicit in OAuth2 user requests",
+            "name": "user_id",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/scoresResponse"
+          },
+          "400": {
+            "$ref": "#/responses/genericParameterErrorResponse"
+          }
+        }
+      }
+    },
+    "/scores/recovery/details": {
+      "get": {
+        "description": "Returns user RecoveryScore detail with daily, weekly, monthly or yearly granularity\nbased on query parameter field. No pagination is involved.",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Scores"
+        ],
+        "summary": "Get User RecoveryScore Details With Granularity",
+        "operationId": "getRecoveryScoreDetails",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "UserID",
+            "description": "This parameter is required for Organization (API Key) requests,\nthe user_id is implicit in OAuth2 user requests",
+            "name": "user_id",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "example": "2021-07-12",
+            "x-go-name": "Date",
+            "description": "Date in YYYYY-MM-DD format (eg: 2021-07-12 for July 12, 2021) for the Recovery Score details,\n\nif granularity=day, it return RecoveryScores for the given date.\n\nif graunalarity>day, it returns RecoveryScore details in a date range with the end date being this given date.",
+            "name": "date",
+            "in": "query",
+            "required": true
+          },
+          {
+            "enum": [
+              "day",
+              "week",
+              "month",
+              "year"
+            ],
+            "type": "string",
+            "example": "week",
+            "x-go-name": "Granularity",
+            "description": "Granularity of Recovery Score details,\npossible values = [day, week, month, year]\n\nif granularity=day, it returns RecoveryScore details for the given date.\n\nif granularity=week or granularityy=month, it returns RecoveryScore details in a date range\nwith end date = given date, and start date = <6, 29> days in the past from the end date (i.e the given date)\nwhich is a total of <7, 30> days of data for granularity = <week, month> respectively.\n\nif granularity=year, it returns monthly RecoveryScore details for the last 12 months.",
+            "name": "granularity",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/recoveryScoreDetailsResponse"
+          },
+          "400": {
+            "$ref": "#/responses/recoveryScoreDetailsParameterErrorResponse"
+          }
+        }
+      }
+    },
+    "/sleep": {
+      "get": {
+        "description": "Returns data for the sleep sessions of a given day.",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Sleep"
+        ],
+        "summary": "Get User Sleep Stats",
+        "operationId": "getSleepStats",
+        "parameters": [
+          {
+            "type": "string",
+            "example": "2018-10-24",
+            "x-go-name": "Date",
+            "description": "The date to filter with, in ISO 8601 format.",
+            "name": "date",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "x-go-name": "UserID",
+            "description": "This parameter is required for Organization (API Key) requests,\nthe user_id is implicit in OAuth2 user requests",
+            "name": "user_id",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/sleepStatsResponse"
+          },
+          "400": {
+            "$ref": "#/responses/genericParameterErrorResponse"
+          }
+        }
+      }
+    },
+    "/sleep/details/day": {
+      "get": {
+        "description": "Returns user daily sleep detail. No pagination is involved.",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Sleep"
+        ],
+        "summary": "Get User Daily Sleep Details",
+        "operationId": "getDailySleepDetails",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "UserID",
+            "description": "This parameter is required for Organization (API Key) requests,\nthe user_id is implicit in OAuth2 user requests",
+            "name": "user_id",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "example": "2021-07-12",
+            "x-go-name": "Date",
+            "description": "Date in YYYYY-MM-DD format (eg: 2021-07-12 for July 12, 2021) for the sleep details,",
+            "name": "date",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/dailySleepDetailsResponse"
+          },
+          "400": {
+            "$ref": "#/responses/dailySleepDetailsParameterErrorResponse"
+          }
+        }
+      }
+    },
+    "/sleep/details/granular": {
+      "get": {
+        "description": "Returns user sleep details with weekly, monthly or yearly granularity\nbased on query parameter field. No pagination is involved.",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Sleep"
+        ],
+        "summary": "Get User Sleep Details With Granularity",
+        "operationId": "getGranularSleepDetails",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "UserID",
+            "description": "This parameter is required for Organization (API Key) requests,\nthe user_id is implicit in OAuth2 user requests",
+            "name": "user_id",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "example": "2021-07-12",
+            "x-go-name": "Date",
+            "description": "Date in YYYYY-MM-DD format (eg: 2021-07-12 for July 12, 2021) for the sleep details,\n\nit returns sleep details in a date range.\nwith the end date being this given date.",
+            "name": "date",
+            "in": "query",
+            "required": true
+          },
+          {
+            "enum": [
+              "week",
+              "month",
+              "year"
+            ],
+            "type": "string",
+            "example": "week",
+            "x-go-name": "Granularity",
+            "description": "Granularity of step details,\npossible values = [week, month, year]\n\nNOTE: if granularity=day, it will rerturn bad request error for the invalid parameter\n\nit returns step details in a date range\nwith end date = given date and start date = <6, 29, 364> days in the past from the end date (i.e the given date)\nwhich is a total of <7, 30, 365> days of data for granularity = <week, month, year> respectively.",
+            "name": "granularity",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/granularSleepDetailsResponse"
+          },
+          "400": {
+            "$ref": "#/responses/granularSleepDetailsParameterErrorResponse"
+          }
+        }
+      }
+    },
+    "/step/details": {
+      "get": {
+        "description": "Returns user step detail with daily, weekly, monthly or yearly granularity\nbased on query parameter field. No pagination is involved.",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Steps"
+        ],
+        "summary": "Get User Step Details With Granularity",
+        "operationId": "getStepDetails",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "UserID",
+            "description": "This parameter is required for Organization (API Key) requests,\nthe user_id is implicit in OAuth2 user requests",
+            "name": "user_id",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "example": "2021-07-12",
+            "x-go-name": "Date",
+            "description": "Date in YYYYY-MM-DD format (eg: 2021-07-12 for July 12, 2021) for the step details,\n\nif granularity=day, it return steps for the given date.\n\nif graunalarity>day, it returns step details in a date or month range\nwith the end date or end month being this given date (or month corresponding to the given date).",
+            "name": "date",
+            "in": "query",
+            "required": true
+          },
+          {
+            "enum": [
+              "day",
+              "week",
+              "month",
+              "year"
+            ],
+            "type": "string",
+            "example": "week",
+            "x-go-name": "Granularity",
+            "description": "Granularity of step details,\npossible values = [day, week, month, year]\n\nif granularity=day, it returns step details for the given date.\n\nif granularity=week or granularity=month, it returns step details in a date range\nwith end date = given date and start date = <6, 29> days in the past from the end date (i.e the given date)\nwhich is a total of <7, 30> days of data or granularity = <week, month> respectively.\n\nif granularity=year, it returns monthly step details for the last 12 months.",
+            "name": "granularity",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/stepDetailsResponse"
+          },
+          "400": {
+            "$ref": "#/responses/stepDetailsParameterErrorResponse"
+          }
+        }
+      }
+    },
+    "/steps": {
+      "get": {
+        "description": "Returns paginated per-minute physical stats.",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Steps"
+        ],
+        "summary": "Get User Steps",
+        "operationId": "getSteps",
+        "parameters": [
+          {
+            "type": "integer",
+            "format": "int64",
+            "x-go-name": "LastTimestamp",
+            "description": "Last timestamp (with millisecond precision) of previous\npage (or 0 if first page).",
+            "name": "last-timestamp",
+            "in": "query",
+            "required": true
+          },
+          {
+            "maximum": 50,
+            "type": "integer",
+            "format": "int64",
+            "x-go-name": "Limit",
+            "description": "Maximum amount of results per page.",
+            "name": "limit",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "x-go-name": "UserID",
+            "description": "This parameter is required for Organization (API Key) requests,\nthe user_id is implicit in OAuth2 user requests",
+            "name": "user_id",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/stepsResponse"
+          },
+          "400": {
+            "$ref": "#/responses/stepsParameterErrorResponse"
+          }
+        }
+      }
+    },
+    "/timeseries/biometrics/cm": {
+      "get": {
+        "description": "Returns paginated biometrics timeseries data.\nLimitations:\nMaximum of 6 hours of data can be fetched in a single request, i.e the difference between\nthe EndTimestampMs and StartTimestampMs of the request parameter cannot exceed 21600 (i.e 6 hours).",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Timeseries"
+        ],
+        "summary": "Get Biometrics Timeseries Data Captured in either Passive or Continuous Mode",
+        "operationId": "getTimeseriesBiometricsContinuousMode",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "UserID",
+            "description": "This parameter is required for Organization (API Key) requests,\nthe user_id is implicit in OAuth2 user requests",
+            "name": "user_id",
+            "in": "query"
+          },
+          {
+            "type": "integer",
+            "format": "int64",
+            "example": 1688169601000,
+            "x-go-name": "StartTimestampMs",
+            "description": "StartTimestampMs is the start of the timestamp range from when the timeseries to be fetched.",
+            "name": "start_timestamp_ms",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "format": "int64",
+            "example": 1688212799000,
+            "x-go-name": "EndTimestampMs",
+            "description": "EndTimestampMs is the end of the timestamp range upto which the timeseries is to be fetched.",
+            "name": "end_timestamp_ms",
+            "in": "query",
+            "required": true
+          },
+          {
+            "enum": [
+              "[heart_rate",
+              "hrv",
+              "spo2",
+              "resp_rate",
+              "ibi]"
+            ],
+            "type": "string",
+            "x-go-name": "MetricFilter",
+            "description": "If present, it will only return the biometric as specified in the filter instead of all the biometrics\nPossible Values for the Metric: [\"heart_rate\", \"hrv\", \"spo2\", \"resp_rate\", \"ibi\"]",
+            "name": "metric_filter",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/timeseriesBiometricsResponse"
+          },
+          "400": {
+            "$ref": "#/responses/genericParameterErrorResponse"
+          }
+        }
+      }
+    },
+    "/user": {
+      "get": {
+        "description": "Returns the user's profile information.\nIf you are using the API Key for organizations, only anonymous data could be returned by this endpoint",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Users"
+        ],
+        "summary": "Get User",
+        "operationId": "getUser",
+        "parameters": [
+          {
+            "type": "string",
+            "x-go-name": "UserID",
+            "description": "This parameter is required for Organization (API Key) requests,\nthe user_id is implicit in OAuth2 user requests",
+            "name": "user_id",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/userResponse"
+          },
+          "404": {
+            "$ref": "#/responses/userNotFoundResponse"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "ActivitiesResponseBody": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/WorkoutStats"
+          },
+          "x-go-name": "Data"
+        },
+        "links": {
+          "$ref": "#/definitions/PaginationLinks"
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi"
+    },
+    "Activity": {
+      "type": "object",
+      "properties": {
+        "active_time": {
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "ActiveTime"
+        },
+        "activity_equipment": {
+          "type": "string",
+          "x-go-name": "ActivityEquipment"
+        },
+        "activity_variation": {
+          "type": "string",
+          "x-go-name": "ActivityVariation"
+        },
+        "bad_reps": {
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "BadReps"
+        },
+        "breaks": {
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "Breaks"
+        },
+        "calories": {
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "Calories"
+        },
+        "cardio_metrics": {
+          "$ref": "#/definitions/CardioMetrics"
+        },
+        "consistency": {
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "Consistency"
+        },
+        "distance": {
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "Distance"
+        },
+        "duration": {
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "Duration"
+        },
+        "end_time": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "EndTime"
+        },
+        "form": {
+          "$ref": "#/definitions/ActivityFormQuality"
+        },
+        "good_reps": {
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "GoodReps"
+        },
+        "is_corrected": {
+          "type": "boolean",
+          "x-go-name": "IsCorrected"
+        },
+        "likely_name": {
+          "type": "string",
+          "x-go-name": "LikelyName"
+        },
+        "muscle_target": {
+          "$ref": "#/definitions/ActivityMuscleTarget"
+        },
+        "potential_matches": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "PotentialMatches"
+        },
+        "rep_unit": {
+          "$ref": "#/definitions/ActivityRepUnit"
+        },
+        "rep_velocity": {
+          "type": "number",
+          "format": "float",
+          "x-go-name": "RepVelocity"
+        },
+        "reps": {
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "Reps"
+        },
+        "rps": {
+          "type": "number",
+          "format": "float",
+          "x-go-name": "RPS"
+        },
+        "score": {
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "Score"
+        },
+        "start_time": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "StartTime"
+        },
+        "swimming_metrics": {
+          "$ref": "#/definitions/SwimMetrics"
+        },
+        "weight": {
+          "type": "number",
+          "format": "float",
+          "x-go-name": "Weight"
+        },
+        "weight_unit": {
+          "$ref": "#/definitions/ActivityWeightUnit"
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi/publicapimodels"
+    },
+    "ActivityFormQuality": {
+      "$ref": "#/definitions/Activity_FormQuality"
+    },
+    "ActivityMuscleTarget": {
+      "$ref": "#/definitions/Activity_MuscleTarget"
+    },
+    "ActivityRepUnit": {
+      "$ref": "#/definitions/Activity_RepUnit"
+    },
+    "ActivityWeightUnit": {
+      "$ref": "#/definitions/Activity_WeightUnit"
+    },
+    "Activity_FormQuality": {
+      "description": "Form of the activity",
+      "type": "integer",
+      "format": "int32",
+      "x-go-package": "biostrap/proto"
+    },
+    "Activity_MuscleTarget": {
+      "description": "Muscle targets of the movement",
+      "type": "integer",
+      "format": "int32",
+      "x-go-package": "biostrap/proto"
+    },
+    "Activity_RepUnit": {
+      "description": "Reps units for apps to show",
+      "type": "integer",
+      "format": "int32",
+      "x-go-package": "biostrap/proto"
+    },
+    "Activity_WeightUnit": {
+      "description": "unit of weight",
+      "type": "integer",
+      "format": "int32",
+      "x-go-package": "biostrap/proto"
+    },
+    "AdditionalBiometrics": {
+      "description": "AdditionalBiometrics are some of the extra and additional biometrics\nthat the Biostrap Pulse Engine outputs in addition to the regular biometrics.\n\nFew of these additional metrics are:\n1. Ae: Arterial Elasticity\n2. Pe: Peripheral Elasticity\n3: Arterial Health Score\n\nThese additional biometrics have some prerequisites for them to be returned:\n1. All these metrics are available when the user has subscribed\nto(has access to) the Heart Health License.\n2. The Ae, Pe and the Arterial Health Score metrics are only present\nfor the Longest/Main Sleep of the Day's Biometrics aggregate and\nnot for each individual biometrics datapoint throughout the day.",
+      "type": "object",
+      "title": "AdditionalBiometrics",
+      "properties": {
+        "ae": {
+          "description": "Arterial Elasticity",
+          "type": "number",
+          "format": "float",
+          "x-go-name": "Ae"
+        },
+        "arterial_health_score": {
+          "description": "Arterial Health Score",
+          "type": "number",
+          "format": "float",
+          "x-go-name": "ArterialHealthScore"
+        },
+        "pe": {
+          "description": "Peripheral Elasticity",
+          "type": "number",
+          "format": "float",
+          "x-go-name": "Pe"
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi/publicapimodels"
+    },
+    "AnonymousMonitoringInfo": {
+      "type": "object",
+      "required": [
+        "subject_id"
+      ],
+      "properties": {
+        "subject_id": {
+          "description": "The subject's ID.",
+          "type": "string",
+          "x-go-name": "ID"
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi/publicapimodels"
+    },
+    "AnonymousMonitoringInfoResponseBody": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AnonymousMonitoringInfo"
+          },
+          "x-go-name": "Data"
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi"
+    },
+    "BiometricsResponseBody": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CardioStats"
+          },
+          "x-go-name": "Data"
+        },
+        "links": {
+          "$ref": "#/definitions/PaginationLinks"
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi"
+    },
+    "CalorieDetailMetric": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "Name is the metric name. Possible values are [Resting Calories, Workout Calories,\nActive Calories, Step Calories, Total Calories].",
+          "type": "string",
+          "enum": [
+            "Resting Calories",
+            "Workout Calories",
+            "Active Calories",
+            "Step Calories",
+            "Total Calories"
+          ],
+          "x-go-name": "Name",
+          "example": "Active Calories"
+        },
+        "timeseries": {
+          "description": "Timeseries is a list of individual time value item for the specific calorie detail metric.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TimeseriesItem"
+          },
+          "x-go-name": "Timeseries"
+        },
+        "type": {
+          "description": "Type is the metric type. Possible values are [Resting Calories, Workout Calories,\nActive Calories, Step Calories, Total Calories].",
+          "type": "string",
+          "enum": [
+            "Resting Calories",
+            "Workout Calories",
+            "Active Calories",
+            "Step Calories",
+            "Total Calories"
+          ],
+          "x-go-name": "Type",
+          "example": "Active Calories"
+        },
+        "unit": {
+          "description": "Unit is the CalorieDetailMetric Type's unit which is either in metric or imperial system\nbased on what the user has selected in the app.\n\nNOTE: for Type which is unitless, the unit field will be empty.",
+          "type": "string",
+          "x-go-name": "Unit",
+          "example": "kcal"
+        },
+        "value": {
+          "description": "Value is either the sum or avg of the set of all the calorie\nmetric in the date range based on the granularity",
+          "type": "number",
+          "format": "float",
+          "x-go-name": "Value",
+          "example": 123
+        },
+        "value_is_an_avg": {
+          "description": "ValueIsAnAvg will be true only when the Value above is an avg of the set in the date range.\nExample for granularity > day, the values are the avg of the set of value in each of those days.",
+          "type": "boolean",
+          "x-go-name": "ValueIsAnAvg",
+          "example": false
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi/publicapimodels"
+    },
+    "CalorieDetailsResponseBody": {
+      "type": "object",
+      "properties": {
+        "calories_goal_achieved_percentage": {
+          "description": "CaloriesGoalAchievedPercentage is the percentage of calories burnt\nbased on a previously set goal.\n\nNOTE: If goal is not set, the percentage will be 100.",
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "CaloriesGoalAchievedPercentage",
+          "example": 82
+        },
+        "daily_calories_goal": {
+          "description": "DailyCaloriesGoal is the number of calories to burn set as a goal in the app by the user.",
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "DailyCaloriesGoal",
+          "example": 350
+        },
+        "date": {
+          "description": "Date of Detail Metrics in YYYY-MM-DD format",
+          "type": "string",
+          "x-go-name": "Date",
+          "example": "2021-07-12"
+        },
+        "granularity": {
+          "description": "Granularity of Calorie Details.\nPossible values: [day, week, month, year]",
+          "type": "string",
+          "enum": [
+            "day",
+            "week",
+            "month",
+            "year"
+          ],
+          "x-go-name": "Granularity",
+          "example": "day"
+        },
+        "metrics": {
+          "description": "Metrics is the list of different type of Calorie details",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CalorieDetailMetric"
+          },
+          "x-go-name": "Metrics"
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi"
+    },
+    "CardioMetrics": {
+      "type": "object",
+      "properties": {
+        "cadence": {
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "Cadence"
+        },
+        "calories_per_minute": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "format": "float"
+          },
+          "x-go-name": "CaloriesPerMinute"
+        },
+        "distance_per_minute": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "x-go-name": "DistancePerMinute"
+        },
+        "environment": {
+          "$ref": "#/definitions/CardioMetricsEnvironment"
+        },
+        "is_trivial": {
+          "type": "boolean",
+          "x-go-name": "IsTrivial"
+        },
+        "rep_per_minute": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "x-go-name": "RepPerMinute"
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi/publicapimodels"
+    },
+    "CardioMetricsEnvironment": {
+      "$ref": "#/definitions/CardioMetrics_Environment"
+    },
+    "CardioMetrics_Environment": {
+      "description": "Activity environment",
+      "type": "integer",
+      "format": "int32",
+      "x-go-package": "biostrap/proto"
+    },
+    "CardioStats": {
+      "type": "object",
+      "properties": {
+        "additional_biometrics": {
+          "$ref": "#/definitions/AdditionalBiometrics"
+        },
+        "bpm": {
+          "description": "Heartbeats per minute.",
+          "type": "number",
+          "format": "float",
+          "x-go-name": "BPM",
+          "example": 80
+        },
+        "brpm": {
+          "description": "Breaths per minute.",
+          "type": "number",
+          "format": "float",
+          "x-go-name": "BRPM",
+          "example": 25
+        },
+        "hrv": {
+          "description": "Heart rate variability (rMSSD).",
+          "type": "number",
+          "format": "float",
+          "x-go-name": "HRV",
+          "example": 25
+        },
+        "resting_bpm": {
+          "description": "Resting HR is present for Slee's Biometrics aggregate\nand not for each individual biometrics datapoin throughout the day.",
+          "type": "number",
+          "format": "float",
+          "x-go-name": "RestingBPM"
+        },
+        "resting_hrv": {
+          "description": "Resting HRV is present for Sleep's Biometrics aggregatre\nand not for each individual biometrics datapoint throughout the day.",
+          "type": "number",
+          "format": "float",
+          "x-go-name": "RestingHRV"
+        },
+        "spo2": {
+          "description": "Arterial oxygen saturation.\nThe unit is the percentage of oxygenated haemoglobin in\na red blood cell.",
+          "type": "number",
+          "format": "float",
+          "x-go-name": "SPO2",
+          "example": 98
+        },
+        "state": {
+          "description": "Describes wether this was an automated recording\nwhile the user was resting or sleeping, or if it was\nmanually requested by the user from an MA session.\nPossible values are \"resting\", \"sleeping\" and \"manual\".",
+          "type": "string",
+          "x-go-name": "State",
+          "example": "resting"
+        },
+        "timestamp": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Timestamp",
+          "example": 1523905147000
+        },
+        "tz_offset_mins": {
+          "description": "Timezone offset in minutes\nFor example if timezone is Pacific Standard Time, which is -07:00\ni.e 7 hours west of GMT, will be represented by -420 minutes.",
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "TzOffsetMins",
+          "example": -420
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi/publicapimodels"
+    },
+    "DailySleepDetailsResponseBody": {
+      "type": "object",
+      "properties": {
+        "all_sleeps_stage_markers": {
+          "description": "AllSleepsStageMarkers provides the start and end time markers of the sleep stages for all the sleeps of the day.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SleepStagesTimeInterval"
+          },
+          "x-go-name": "AllSleepsStageMarkers"
+        },
+        "all_sleeps_time_details": {
+          "description": "AllSleepsTimeDetails is the list of time details of a sleep for all the sleeps of the day.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SleepTimeDetails"
+          },
+          "x-go-name": "AllSleepsTimeDetails"
+        },
+        "date": {
+          "description": "Date of Detail Metrics in YYYY-MM-DD format",
+          "type": "string",
+          "x-go-name": "Date",
+          "example": "2021-07-12"
+        },
+        "main_sleep_detail_metrics": {
+          "$ref": "#/definitions/SleepDetailMetrics"
+        },
+        "main_sleep_stages_percentages": {
+          "$ref": "#/definitions/SleepStagesPercentages"
+        },
+        "sleep_stages": {
+          "description": "SleepStages is the list of all the stages associated with all the sleeps of the day",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SleepStageInterval"
+          },
+          "x-go-name": "SleepStages"
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi"
+    },
+    "DateSleepDetailMetrics": {
+      "type": "object",
+      "properties": {
+        "awake_duration_in_mins": {
+          "description": "AwakeDurationInMins is the number of minutes spent awake during the sleep.",
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "AwakeDurationInMins",
+          "example": 74
+        },
+        "date": {
+          "description": "Date in RFC3339 format",
+          "type": "string",
+          "x-go-name": "DateRFC33339",
+          "example": "2021-07-12"
+        },
+        "deep_sleep_duration_in_mins": {
+          "description": "DeepSleepDurationInMins is the number of minutes spent in deep sleep.",
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "DeepSleepDurationInMins",
+          "example": 123
+        },
+        "fall_asleep_latency_in_mins": {
+          "description": "FallAsleepLatencyInMins is total the number of minutes passed before falling asleep.\n\nNOTE: if no time is spent in falling asleep, i.e the sleep onset happens immediately, then\nin that case, the FallAsleepLatencyInMins field will not be present in the response.",
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "FallAsleepLatencyInMins",
+          "example": 23
+        },
+        "light_sleep_duration_in_mins": {
+          "description": "LightSleepDurationInMins is the number of minutes spent in light sleep.",
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "LightSleepDurationInMins",
+          "example": 202
+        },
+        "number_of_awakenings": {
+          "description": "NumberOfAwakenings is the total number of awakening moments/events during the sleep.",
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "NumberOfAwakenings",
+          "example": 4
+        },
+        "rem_sleep_duration_in_mins": {
+          "description": "REMSleepDurationInMins is the number of minutes spent in REM sleep.",
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "REMSleepDurationInMins",
+          "example": 123
+        },
+        "sleep_score": {
+          "description": "SleepScore is the score associated with the sleep.\n\nNOTE: if there was some issue generating score for the sleep or the score\nwas not generated due to non-compliance or not meeting the scoring prerequisites,\nthen in that case, SleepScore field will not be present in the response.",
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "SleepScore",
+          "example": 82
+        },
+        "total_sleep_duration_in_mins": {
+          "description": "TotalSleepDurationInMins is the total number of minutes spent in light and deep sleep together.",
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "TotalSleepDurationInMins",
+          "example": 325
+        },
+        "total_time_in_bed_in_mins": {
+          "description": "TotalTimeInBedInMins is the total number of minutes spent in bed which is different from TotalSleepDurationInMins.",
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "TotalTimeInBedInMins",
+          "example": 428
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi/publicapimodels"
+    },
+    "DateSleepStagesPercentages": {
+      "type": "object",
+      "properties": {
+        "awake": {
+          "description": "Awake is the percentage of awake sleep stages of the main sleep of the given Date",
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "Awake",
+          "example": 17
+        },
+        "date": {
+          "description": "Date in RFC3339 format",
+          "type": "string",
+          "x-go-name": "DateRFC33339",
+          "example": "2021-07-12"
+        },
+        "deep": {
+          "description": "Deep is the percentage of deep sleep stages of the main sleep of the given Date",
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "Deep",
+          "example": 40
+        },
+        "light": {
+          "description": "Light is the percentage of light sleep stages of the main sleep of the given Date",
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "Light",
+          "example": 43
+        },
+        "rem": {
+          "description": "REM is percentage of rem sleep stages in the sleep",
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "REM"
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi/publicapimodels"
+    },
+    "File": {
+      "type": "object",
+      "title": "File represents an open file descriptor.",
+      "x-go-package": "os"
+    },
+    "GenericParameterError": {
+      "type": "object",
+      "properties": {
+        "detail": {
+          "type": "string",
+          "x-go-name": "Detail"
+        },
+        "source": {
+          "$ref": "#/definitions/ParameterErrorSource"
+        },
+        "status": {
+          "description": "The HTTP status code for this error.",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Status"
+        },
+        "title": {
+          "type": "string",
+          "x-go-name": "Title"
+        }
+      },
+      "x-go-package": "biostrap/api/common/jsoncommon"
+    },
+    "Goals": {
+      "type": "object",
+      "required": [
+        "steps",
+        "sleep",
+        "calories",
+        "workout"
+      ],
+      "properties": {
+        "calories": {
+          "description": "Calories to burn per day",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Calories",
+          "example": 2300
+        },
+        "sleep": {
+          "description": "Seconds of sleep per day",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Sleep",
+          "example": 28800
+        },
+        "steps": {
+          "description": "Steps to walk per day",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Steps",
+          "example": 10000
+        },
+        "workout": {
+          "description": "Seconds of workout per day",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Workout",
+          "example": 3600
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi/publicapimodels"
+    },
+    "GranularSleepDetailsResponseBody": {
+      "type": "object",
+      "properties": {
+        "avg_sleep_detail_metrics": {
+          "$ref": "#/definitions/SleepDetailMetrics"
+        },
+        "avg_sleep_stages_percentages": {
+          "$ref": "#/definitions/SleepStagesPercentages"
+        },
+        "date": {
+          "description": "Date of Detail Metrics in YYYY-MM-DD format",
+          "type": "string",
+          "x-go-name": "Date",
+          "example": "2021-07-12"
+        },
+        "granularity": {
+          "description": "Granularity of Sleep Details.\nPossible values: [week, month, year]",
+          "type": "string",
+          "enum": [
+            "week",
+            "month",
+            "year"
+          ],
+          "x-go-name": "Granularity",
+          "example": "day"
+        },
+        "sleep_detail_metric_date_datapoints": {
+          "description": "SleepDetailMetricsDateDatapoints provides the date wise sleep metrics for all the sleeps in the requested date range.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DateSleepDetailMetrics"
+          },
+          "x-go-name": "SleepDetailMetricsDateDatapoints"
+        },
+        "sleep_stages_date_infos": {
+          "description": "SleepStagesDateInfos provides the date wise sleep stages percentages info for all the sleeps in the requested date range.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DateSleepStagesPercentages"
+          },
+          "x-go-name": "SleepStagesDateInfos"
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi"
+    },
+    "Insight": {
+      "type": "object",
+      "properties": {
+        "comment": {
+          "type": "string",
+          "x-go-name": "Comment"
+        },
+        "content": {
+          "type": "string",
+          "x-go-name": "Content"
+        },
+        "graph": {
+          "type": "object",
+          "x-go-name": "Graph"
+        },
+        "insight_type": {
+          "$ref": "#/definitions/InsightType"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "priority": {
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "Priority"
+        },
+        "title": {
+          "type": "string",
+          "x-go-name": "Title"
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi/publicapimodels"
+    },
+    "InsightType": {
+      "$ref": "#/definitions/Insight_INSIGHT_TYPE"
+    },
+    "Insight_INSIGHT_TYPE": {
+      "type": "integer",
+      "format": "int32",
+      "x-go-package": "biostrap/proto"
+    },
+    "Insights": {
+      "type": "object",
+      "properties": {
+        "insights": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/Insight"
+          },
+          "x-go-name": "Insights"
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi/publicapimodels"
+    },
+    "InsightsResponseBody": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "$ref": "#/definitions/Insights"
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi"
+    },
+    "JobStatusResponseBody": {
+      "type": "object",
+      "properties": {
+        "job_id": {
+          "description": "Job ID is the unique ID associated with data download job request which\ncan be tracked using a the Get Data Download Job Status API.\nThe Job ID tracks the current status of the of the download upto when\nthe data-download file's downloadable url link is emailed to the target_email\nsent in the request api.",
+          "type": "string",
+          "x-go-name": "JobID"
+        },
+        "job_type": {
+          "description": "JobType denotes what is the kind of job this is.\n\nPossible values are [\"bulk_data_download\"]",
+          "type": "string",
+          "enum": [
+            "bulk_data_download"
+          ],
+          "x-go-name": "JobType"
+        },
+        "latest_status": {
+          "description": "Status denotes the lask known / latest status of the job identified by the job_id\n\nPossible values are [\"start\", \"complete\", \"failed\", \"in_queue\", \"processing\", \"data_file_generating\", \"data_file_generation_failed\", \"emailing_job_result\", \"email_job_result_failed\", \"processing_err\"]\nWhere:\nstart = the job has started\ncomplete = the job is finished\nfailed = the job has failed due to some reason\nin_queue = the job has started and has been sent to a queue awaiting proccessing\nprocessing = the job is being processed now after being taken from the queue\ndata_file_generating = if the job involves generating some kind of data files, then those data files are geing generated\ndata_file_generation_failed = the data file generation if it was being generated has failed due some error\nemailing_job_result = if the job involves sending some email, the email is being sent now\nemail_job_result_failed = if the job involves sending some email, the email failed.\nprocessing_err = the job while being processed failed due to some error.\nNOTE: in some cases processing_err and failed are interchangeably used and both mean the same thing.",
+          "type": "string",
+          "enum": [
+            "start",
+            "complete",
+            "failed",
+            "in_queue",
+            "processing",
+            "data_file_generating",
+            "data_file_generation_failed",
+            "emailing_job_result",
+            "email_job_result_failed",
+            "processing_err"
+          ],
+          "x-go-name": "LatestStatus"
+        },
+        "status_updated_at_ts": {
+          "description": "StatusUpdatedAtTs provides the unix timestamp at which the given status of the job was updated",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "StatusUpdatedAtTs"
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi"
+    },
+    "LockUnlockDeviceToUserResponseBody": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "description": "Status is the status of the lock or unlock request.\nPossible values are [success, failed].",
+          "type": "string",
+          "enum": [
+            "success",
+            "failed"
+          ],
+          "x-go-name": "Status",
+          "example": "success"
+        },
+        "status_message": {
+          "description": "StatusMessage gives a descriptive message of the status if the staus is failed.\nIn case of status = success, no status_message will be sent.",
+          "type": "string",
+          "x-go-name": "StatusMessage"
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi"
+    },
+    "LoginTokenResponseBody": {
+      "type": "object",
+      "properties": {
+        "token": {
+          "type": "string",
+          "x-go-name": "Token"
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi"
+    },
+    "MonitoringInfo": {
+      "type": "object",
+      "required": [
+        "subject_id",
+        "subject_email",
+        "subject_name"
+      ],
+      "properties": {
+        "subject_email": {
+          "description": "The subject's email address.",
+          "type": "string",
+          "x-go-name": "Email",
+          "example": "john.doe@example.com"
+        },
+        "subject_id": {
+          "description": "The subject's ID.",
+          "type": "string",
+          "x-go-name": "ID"
+        },
+        "subject_name": {
+          "description": "The subject's name.",
+          "type": "string",
+          "x-go-name": "Name",
+          "example": "John Doe"
+        },
+        "subject_photo_url": {
+          "description": "URL to the subject's profile photo, if any.",
+          "type": "string",
+          "x-go-name": "PhotoURL",
+          "example": "http://"
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi/publicapimodels"
+    },
+    "MonitoringInfoResponseBody": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/MonitoringInfo"
+          },
+          "x-go-name": "Data"
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi"
+    },
+    "PaginationLinks": {
+      "description": "Links for resource pagination",
+      "type": "object",
+      "properties": {
+        "next": {
+          "description": "URL to next page",
+          "type": "string",
+          "x-go-name": "Next",
+          "example": "https://..."
+        },
+        "prev": {
+          "description": "URL to previous page",
+          "type": "string",
+          "x-go-name": "Prev",
+          "example": "https://..."
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi"
+    },
+    "PaginationResults": {
+      "type": "object",
+      "properties": {
+        "availabe_pages": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "AvailablePages"
+        },
+        "items_per_page": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ItemsPerPage"
+        },
+        "page": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Page"
+        },
+        "total_items": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "TotalItems"
+        }
+      },
+      "x-go-package": "biostrap/pkg/common"
+    },
+    "ParameterErrorSource": {
+      "type": "object",
+      "properties": {
+        "parameter": {
+          "description": "The query string parameter that caused the error",
+          "type": "string",
+          "x-go-name": "Parameter"
+        },
+        "reason": {
+          "type": "string",
+          "x-go-name": "Reason"
+        }
+      },
+      "x-go-package": "biostrap/api/common/jsoncommon"
+    },
+    "PhysicalStats": {
+      "type": "object",
+      "properties": {
+        "distance": {
+          "description": "Meters walked in that minute.",
+          "type": "number",
+          "format": "float",
+          "x-go-name": "Distance",
+          "example": 79.2
+        },
+        "steps": {
+          "description": "Number of steps walked in that minute.",
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "Steps",
+          "example": 110
+        },
+        "timestamp": {
+          "description": "Timestamp is precise to the minute.",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Timestamp",
+          "example": 1523905140
+        },
+        "total_step_calories": {
+          "description": "Calories burnt from walking in that minute.",
+          "type": "number",
+          "format": "float",
+          "x-go-name": "TotalStepCalories",
+          "example": 28.2
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi/publicapimodels"
+    },
+    "RecoveryScoreDetailsResponseBody": {
+      "type": "object",
+      "properties": {
+        "date": {
+          "description": "Date of Detail Metrics in YYYY-MM-DD format",
+          "type": "string",
+          "x-go-name": "Date",
+          "example": "2021-07-12"
+        },
+        "granularity": {
+          "description": "Granularity of Recovery Score Details.\nPossible values: [day, week, month, year]",
+          "type": "string",
+          "enum": [
+            "day",
+            "week",
+            "month",
+            "year"
+          ],
+          "x-go-name": "Granularity",
+          "example": "day"
+        },
+        "in_calibration_mode": {
+          "description": "InCalibrationMode will be available only when granularity=day and\nwill be true if total number of sleeps in the last 30 days are less than\nrequired by Biostrap for recovery score to be generated for the user.\nIf granualarity != day, this field will not be present.\nIf granularity = day and there has been more than required number of\nsleeps and a recovery score has been already generated for that day, then\nthis field will have a value of false.",
+          "type": "boolean",
+          "x-go-name": "InCalibrationMode"
+        },
+        "score": {
+          "description": "Score is the actual recovery score.\nIf granularity = day, it returns the day's score\nif granularity = week, month or year, it returns the avg of the last 7, 30 or 365 days.",
+          "type": "number",
+          "format": "float",
+          "x-go-name": "Score"
+        },
+        "score_baseline": {
+          "description": "ScoreBaseline is the avg of the last 30 days of Recovery Scores.\n\nNOTE: it returns avgs based on valid scores, if a user has not recorded sleep\nfor a day and does not have a recovery score or has some bad biometrics which\nresulted into no recover scory so we don't count these days in the final baseline calculation.",
+          "type": "number",
+          "format": "float",
+          "x-go-name": "ScoreBaseline",
+          "example": 80
+        },
+        "score_datapoints": {
+          "description": "ScoreDatapoints are the list of recovery score values for each date in the date range\nif granularity = week or month.\nif granularity = year, its the monthly average of each month for the last 12 months.\nif granularity = day, there will be just item in this list if recovery score exists for\nthe given date.\n\nNOTE: for no cases, the Time component will exist, it will always be a date and value pair.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TimeseriesItem"
+          },
+          "x-go-name": "ScoreDatapoints"
+        },
+        "score_improvement_over_baseline_percentage": {
+          "description": "ScoreImprovementOverBaselinePercentage is the improvement of Score over ScoreBaseline in percentage.",
+          "type": "number",
+          "format": "float",
+          "x-go-name": "ScoreImprovementOverBaselinePercentage",
+          "example": 14.29
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi"
+    },
+    "RegisterOrganizationUserResponseBody": {
+      "type": "object",
+      "properties": {
+        "login_id": {
+          "type": "string",
+          "x-go-name": "LoginID"
+        },
+        "user_id": {
+          "type": "string",
+          "x-go-name": "UserID"
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi"
+    },
+    "RequestRawDataDownloadResponseBody": {
+      "type": "object",
+      "properties": {
+        "job_id": {
+          "description": "Job ID is the unique ID associated with data download job request which\ncan be tracked using a the Get Data Download Job Status API.\nThe Job ID tracks the current status of the of the download upto when\nthe data-download file's downloadable url link is emailed to the target_email\nsent in the request api.",
+          "type": "string",
+          "x-go-name": "JobID"
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi"
+    },
+    "ScoresResponseBody": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "$ref": "#/definitions/ScoresResponseData"
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi"
+    },
+    "ScoresResponseData": {
+      "type": "object",
+      "properties": {
+        "activity": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object"
+          },
+          "x-go-name": "Activity"
+        },
+        "recovery": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object"
+          },
+          "x-go-name": "Recovery"
+        },
+        "sleep": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object"
+          },
+          "x-go-name": "Sleep"
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi"
+    },
+    "SendInvitationRequestBody": {
+      "type": "object",
+      "properties": {
+        "return_invitation_links": {
+          "type": "boolean",
+          "x-go-name": "ReturnInvitationLinks"
+        },
+        "users": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "email": {
+                "type": "string",
+                "x-go-name": "Email"
+              },
+              "name": {
+                "type": "string",
+                "x-go-name": "Name"
+              }
+            }
+          },
+          "x-go-name": "Users"
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi"
+    },
+    "SendInvitationResponseBody": {
+      "type": "object",
+      "properties": {
+        "invitation_links_to_send": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SendInvitationResponseInviteLink"
+          },
+          "x-go-name": "InvitationLinksToSend"
+        },
+        "pending_to_create_account": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "EmailsPendingToCreateAccount"
+        },
+        "pending_to_join_org": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "EmailsPendingToJoinOrg"
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi"
+    },
+    "SendInvitationResponseInviteLink": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "x-go-name": "Email"
+        },
+        "link": {
+          "type": "string",
+          "x-go-name": "Link"
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi"
+    },
+    "SleepAccounting": {
+      "type": "object",
+      "properties": {
+        "circadian_score": {
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "CircadianScore"
+        },
+        "current_day": {
+          "$ref": "#/definitions/SleepAccountingItem"
+        },
+        "day_before_previous_day": {
+          "$ref": "#/definitions/SleepAccountingItem"
+        },
+        "previous_day": {
+          "$ref": "#/definitions/SleepAccountingItem"
+        },
+        "sleep_debt_in_mins": {
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "SleepDebtNetMins"
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi/publicapimodels"
+    },
+    "SleepAccountingItem": {
+      "type": "object",
+      "properties": {
+        "achieved_mins": {
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "AchievedMins"
+        },
+        "debt_mins": {
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "DebtMins"
+        },
+        "no_data_present": {
+          "type": "boolean",
+          "x-go-name": "NoDataPresent"
+        },
+        "recommended_mins": {
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "RecommendedMins"
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi/publicapimodels"
+    },
+    "SleepDetailMetrics": {
+      "type": "object",
+      "properties": {
+        "awake_duration_in_mins": {
+          "description": "AwakeDurationInMins is the number of minutes spent awake during the sleep.",
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "AwakeDurationInMins",
+          "example": 74
+        },
+        "deep_sleep_duration_in_mins": {
+          "description": "DeepSleepDurationInMins is the number of minutes spent in deep sleep.",
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "DeepSleepDurationInMins",
+          "example": 123
+        },
+        "fall_asleep_latency_in_mins": {
+          "description": "FallAsleepLatencyInMins is total the number of minutes passed before falling asleep.\n\nNOTE: if no time is spent in falling asleep, i.e the sleep onset happens immediately, then\nin that case, the FallAsleepLatencyInMins field will not be present in the response.",
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "FallAsleepLatencyInMins",
+          "example": 23
+        },
+        "light_sleep_duration_in_mins": {
+          "description": "LightSleepDurationInMins is the number of minutes spent in light sleep.",
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "LightSleepDurationInMins",
+          "example": 202
+        },
+        "number_of_awakenings": {
+          "description": "NumberOfAwakenings is the total number of awakening moments/events during the sleep.",
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "NumberOfAwakenings",
+          "example": 4
+        },
+        "rem_sleep_duration_in_mins": {
+          "description": "REMSleepDurationInMins is the number of minutes spent in REM sleep.",
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "REMSleepDurationInMins",
+          "example": 123
+        },
+        "sleep_score": {
+          "description": "SleepScore is the score generated for the sleep.\n\nNOTE: if there was some issue generating score for the sleep or the score\nwas not generated due to non-compliance or not meeting the scoring prerequisites,\nthen in that case, SleepScore field will not be present in the response or if present\nit could be a zero score value.",
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "SleepScore",
+          "example": 82
+        },
+        "total_sleep_duration_in_mins": {
+          "description": "TotalSleepDurationInMins is the total number of minutes spent in light and deep sleep together.",
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "TotalSleepDurationInMins",
+          "example": 325
+        },
+        "total_time_in_bed_in_mins": {
+          "description": "TotalTimeInBedInMins is the total number of minutes spent in bed which is different from TotalSleepDurationInMins.",
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "TotalTimeInBedInMins",
+          "example": 428
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi/publicapimodels"
+    },
+    "SleepDisturbanceGraph": {
+      "type": "object",
+      "properties": {
+        "mild": {
+          "$ref": "#/definitions/SleepDisturbanceGraphStageInfo"
+        },
+        "moderate": {
+          "$ref": "#/definitions/SleepDisturbanceGraphStageInfo"
+        },
+        "none": {
+          "$ref": "#/definitions/SleepDisturbanceGraphStageInfo"
+        },
+        "severe": {
+          "$ref": "#/definitions/SleepDisturbanceGraphStageInfo"
+        },
+        "stages": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SleepDisturbanceStageSegment"
+          },
+          "x-go-name": "Stages"
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi/publicapimodels"
+    },
+    "SleepDisturbanceGraphStageInfo": {
+      "type": "object",
+      "properties": {
+        "minutes_spent_in_stage": {
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "MinutesSpentInStage"
+        },
+        "percentage": {
+          "type": "number",
+          "format": "float",
+          "x-go-name": "Percentage"
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi/publicapimodels"
+    },
+    "SleepDisturbanceStageSegment": {
+      "type": "object",
+      "properties": {
+        "disturbance": {
+          "type": "string",
+          "x-go-name": "Disturbance"
+        },
+        "point": {
+          "$ref": "#/definitions/TimeValuePoint"
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi/publicapimodels"
+    },
+    "SleepDisturbances": {
+      "type": "object",
+      "properties": {
+        "arm": {
+          "$ref": "#/definitions/SleepDisturbanceGraph"
+        },
+        "leg": {
+          "$ref": "#/definitions/SleepDisturbanceGraph"
+        },
+        "snoring": {
+          "$ref": "#/definitions/SleepDisturbanceGraph"
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi/publicapimodels"
+    },
+    "SleepMetric": {
+      "type": "object",
+      "properties": {
+        "Name": {
+          "type": "string"
+        },
+        "Value": {
+          "$ref": "#/definitions/SleepMetricValue"
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi/publicapimodels"
+    },
+    "SleepMetricValue": {
+      "type": "object",
+      "properties": {
+        "timestamp": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Timestamp"
+        },
+        "timezone": {
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "Timezone"
+        },
+        "unit": {
+          "type": "string",
+          "x-go-name": "Unit"
+        },
+        "value": {
+          "type": "number",
+          "format": "float",
+          "x-go-name": "Value"
+        },
+        "value_type": {
+          "type": "string",
+          "x-go-name": "ValueType"
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi/publicapimodels"
+    },
+    "SleepScore": {
+      "description": "SleepScore is the score generated for the sleep session.\nIt also consists of additional metadata which contribute to the sleep score.",
+      "type": "object",
+      "title": "SleepScore",
+      "properties": {
+        "message": {
+          "description": "An explanation accompanying score.",
+          "type": "string",
+          "x-go-name": "Message"
+        },
+        "meta": {
+          "description": "Values used to compute the score.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "number",
+            "format": "float"
+          },
+          "x-go-name": "Meta"
+        },
+        "value": {
+          "description": "The numeric value for the score.",
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "Value"
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi/publicapimodels"
+    },
+    "SleepStage": {
+      "$ref": "#/definitions/SleepTags"
+    },
+    "SleepStageInterval": {
+      "type": "object",
+      "properties": {
+        "end_time": {
+          "description": "EndTime in RFC3339 format of the sleep stage with the above Status",
+          "type": "string",
+          "x-go-name": "EndTimeRFC3339",
+          "example": "2021-07-12T12:42:31Z"
+        },
+        "start_time": {
+          "description": "StartTime in RFC3339 format of the sleep stage with the above Status",
+          "type": "string",
+          "x-go-name": "StartTimeRFC3339",
+          "example": "2021-07-12T12:34:51Z"
+        },
+        "status": {
+          "description": "Status is the sleep stage status",
+          "type": "string",
+          "enum": [
+            "light",
+            "deep",
+            "awake",
+            "rem"
+          ],
+          "x-go-name": "Status",
+          "example": "light"
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi/publicapimodels"
+    },
+    "SleepStagesPercentages": {
+      "type": "object",
+      "properties": {
+        "awake": {
+          "description": "Awake is the percentage of awake sleep stages in the sleep",
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "Awake",
+          "example": 17
+        },
+        "deep": {
+          "description": "Deep is the percentage of deep sleep stages in the sleep",
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "Deep",
+          "example": 40
+        },
+        "light": {
+          "description": "Light is the percentage of light sleep stages in the sleep",
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "Light",
+          "example": 43
+        },
+        "rem": {
+          "description": "REM is percentage of rem sleep stages in the sleep",
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "REM"
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi/publicapimodels"
+    },
+    "SleepStagesTimeInterval": {
+      "type": "object",
+      "properties": {
+        "end_time": {
+          "description": "EndTime in RFC3339 format of the sleep's last identified stage",
+          "type": "string",
+          "x-go-name": "EndTimeRFC3339",
+          "example": "2021-07-12T07:26:39Z"
+        },
+        "start_time": {
+          "description": "StartTime in RFC3339 format of the sleep's first identified stage",
+          "type": "string",
+          "x-go-name": "StartTimeRFC3339",
+          "example": "2021-07-12T01:34:51Z"
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi/publicapimodels"
+    },
+    "SleepStats": {
+      "type": "object",
+      "properties": {
+        "arousal_count": {
+          "description": "Number of times the user woke up.",
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "ArousalCount"
+        },
+        "avg_heart_rate": {
+          "description": "Average heart rate for the entire session.",
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "AvgHeartRate"
+        },
+        "awake_time_mins": {
+          "description": "Minutes awake.",
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "AwakeTime"
+        },
+        "biometrics": {
+          "$ref": "#/definitions/CardioStats"
+        },
+        "deep_sleep_mins": {
+          "description": "Minutes spent in deep sleep.",
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "DeepSleep"
+        },
+        "disturbances": {
+          "$ref": "#/definitions/SleepDisturbances"
+        },
+        "end_timestamp": {
+          "description": "End of sleep session.",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "EndTimestamp",
+          "example": 1523946621
+        },
+        "fall_asleep_mins": {
+          "description": "Minutes spent trying to fall asleep.",
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "FallAsleep"
+        },
+        "light_sleep_mins": {
+          "description": "Minutes spent in light sleep.",
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "LightSleep"
+        },
+        "meta": {
+          "description": "Metadata related to the recording.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "x-go-name": "Meta"
+        },
+        "metrics": {
+          "description": "Sleep metrics data.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SleepMetric"
+          },
+          "x-go-name": "Metrics"
+        },
+        "rem_sleep_mins": {
+          "description": "Minutes spent in deep sleep.",
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "REMSleep"
+        },
+        "score": {
+          "$ref": "#/definitions/SleepScore"
+        },
+        "sleep_accounting": {
+          "$ref": "#/definitions/SleepAccounting"
+        },
+        "sleep_onset": {
+          "description": "Timestamp for the first time the user fell asleep.",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "SleepOnset"
+        },
+        "stages": {
+          "description": "An array containing the different stages the user\nwas in during the session.\nThe values contained in the array can be \"awake\",\n\"light_sleep\", \"deep_sleep\" and \"unknown\".",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SleepStage"
+          },
+          "x-go-name": "Stages",
+          "example": "light_sleep"
+        },
+        "start_timestamp": {
+          "description": "Beginning of sleep session.",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "StartTimestamp",
+          "example": 1523924112
+        },
+        "survey": {
+          "$ref": "#/definitions/Survey"
+        },
+        "tz_offset": {
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "TzOffset"
+        },
+        "wakeup_time": {
+          "description": "Timestamp for the last time the user woke up.",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "WakeUpTime"
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi/publicapimodels"
+    },
+    "SleepStatsResponseBody": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SleepStats"
+          },
+          "x-go-name": "Data"
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi"
+    },
+    "SleepTags": {
+      "description": "Sleep labels (tags) for the activeness bars shown on the sleep page. One tag per bar",
+      "type": "integer",
+      "format": "int32",
+      "x-go-package": "biostrap/proto"
+    },
+    "SleepTimeDetails": {
+      "type": "object",
+      "properties": {
+        "end_ts_millis": {
+          "description": "EndTsMillis is the utc timestamp in millisecond granularity of the end time of the sleep",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "EndTsMillis",
+          "example": 1630938540000
+        },
+        "slee_wakeup_ts_millis": {
+          "description": "SleeWakeupTsMillis is the utc timestamp in millisecond granularity of the wake up time for the sleep",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "SleeWakeupTsMillis",
+          "example": 1630938120000
+        },
+        "sleep_onset_ts_millis": {
+          "description": "SleepOnsetTsMillis is the utc timestamp in millisecond granularity of the onset time of the sleep\nIf there is no latency in sleep, both start time and onset time will be the same",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "SleepOnsetTsMillis",
+          "example": 1630910880000
+        },
+        "sleep_tz_offset_in_mins": {
+          "description": "SleepTzOffsetInMins is the timezone offset in minutes.\nFor eg: -420 for -07:00, i.e 7 hour west of GMT, in other words, Pacific Time",
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "SleepTzOffsetInMins",
+          "example": -420
+        },
+        "start_ts_millis": {
+          "description": "StartTsMillis is the utc timestamp in millisecond granularity of the start time of the sleep",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "StartTsMillis",
+          "example": 1630910880000
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi/publicapimodels"
+    },
+    "StepDetailMetric": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "Name is the metric name. Possible values are [Calories, Duration, Distance, Steps].",
+          "type": "string",
+          "enum": [
+            "Calories",
+            "Duration",
+            "Distance",
+            "Steps"
+          ],
+          "x-go-name": "Name",
+          "example": "Distance"
+        },
+        "timeseries": {
+          "description": "Timeseries is a list of individual time value item for the specific step detail metric.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TimeseriesItem"
+          },
+          "x-go-name": "Timeseries"
+        },
+        "type": {
+          "description": "Type is the metric type. Possible values are [Calories, Duration, Distance, Steps].",
+          "type": "string",
+          "enum": [
+            "Calories",
+            "Duration",
+            "Distance",
+            "Steps"
+          ],
+          "x-go-name": "Type",
+          "example": "Distance"
+        },
+        "unit": {
+          "description": "Unit is the StepDetailMetric Type's unit which is either in metric or imperial system\nbased on what the user has selected in the app.\n\nNOTE: for Type which is unitless like steps iteslf, the unit field will be empty.",
+          "type": "string",
+          "x-go-name": "Unit",
+          "example": "km"
+        },
+        "value": {
+          "description": "Value is either the sum or avg of the set of all the step\nmetric in the date range based on the granularity",
+          "type": "number",
+          "format": "float",
+          "x-go-name": "Value",
+          "example": 5.6
+        },
+        "value_is_an_avg": {
+          "description": "ValueIsAnAvg will be true only when the Value above is an avg of the set in the date range.\nExample for granularity > day, the values are the avg of the set of value in each of those days.",
+          "type": "boolean",
+          "x-go-name": "ValueIsAnAvg",
+          "example": false
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi/publicapimodels"
+    },
+    "StepDetailsResponseBody": {
+      "type": "object",
+      "properties": {
+        "daily_steps_goal": {
+          "description": "DailyStepsGoal is the number of steps set as a goal in the app by the user.",
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "DailyStepsGoal",
+          "example": 7000
+        },
+        "date": {
+          "description": "Date of Detail Metrics in YYYY-MM-DD format",
+          "type": "string",
+          "x-go-name": "Date",
+          "example": "2021-07-12"
+        },
+        "granularity": {
+          "description": "Granularity of Step Details.\nPossible values: [day, week, month, year]",
+          "type": "string",
+          "enum": [
+            "day",
+            "week",
+            "month",
+            "year"
+          ],
+          "x-go-name": "Granularity",
+          "example": "day"
+        },
+        "metrics": {
+          "description": "Metrics is the list of different type of step details",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/StepDetailMetric"
+          },
+          "x-go-name": "Metrics"
+        },
+        "steps_goal_achieved_percentage": {
+          "description": "StepsGoalAchievedPercentage is the percentage of steps completed\nbased on a previously set goal.\n\nNOTE: If goal is not set, the percentage will be 100.",
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "StepsGoalAchievedPercentage",
+          "example": 72
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi"
+    },
+    "StepsResponseBody": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/PhysicalStats"
+          },
+          "x-go-name": "Data"
+        },
+        "links": {
+          "$ref": "#/definitions/PaginationLinks"
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi"
+    },
+    "Survey": {
+      "type": "object",
+      "properties": {
+        "date": {
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "Date"
+        },
+        "questions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SurveyQuestion"
+          },
+          "x-go-name": "Questions"
+        },
+        "survey_id": {
+          "type": "string",
+          "x-go-name": "SurveyID"
+        },
+        "survey_type": {
+          "$ref": "#/definitions/SurveyType"
+        },
+        "timestamp": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Timestamp"
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi/publicapimodels"
+    },
+    "SurveyQuestion": {
+      "type": "object",
+      "properties": {
+        "answer_percentage": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "AnswerStrings"
+        },
+        "answer_strings": {
+          "type": "number",
+          "format": "float",
+          "x-go-name": "AnswerPercentage"
+        },
+        "id": {
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "ID"
+        },
+        "question_text": {
+          "type": "string",
+          "x-go-name": "QuestionText"
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi/publicapimodels"
+    },
+    "SurveyType": {
+      "$ref": "#/definitions/SurveyType"
+    },
+    "SwimMetrics": {
+      "type": "object",
+      "properties": {
+        "average_lap_time": {
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "AverageLapTime"
+        },
+        "calories_per_lap": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "format": "float"
+          },
+          "x-go-name": "CaloriesPerLap"
+        },
+        "laps": {
+          "type": "number",
+          "format": "float",
+          "x-go-name": "Laps"
+        },
+        "length_time": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "x-go-name": "LengthTime"
+        },
+        "pool_length": {
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "PoolLength"
+        },
+        "strokes_per_lap": {
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "StrokesPerLap"
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi/publicapimodels"
+    },
+    "TimeTzWrapper": {
+      "type": "object",
+      "properties": {
+        "timestamp": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Timestamp"
+        },
+        "timezone": {
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "Timezone"
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi/publicapimodels"
+    },
+    "TimeValuePoint": {
+      "type": "object",
+      "properties": {
+        "timestamp": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Timestamp"
+        },
+        "timezone": {
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "Timezone"
+        },
+        "value": {
+          "type": "number",
+          "format": "float",
+          "x-go-name": "Value"
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi/publicapimodels"
+    },
+    "TimeseriesBiometricsData": {
+      "type": "object",
+      "properties": {
+        "hr_bpm": {
+          "description": "HeartRate in beats per minute.",
+          "type": "number",
+          "format": "float",
+          "x-go-name": "HeartRateBPM",
+          "example": 80
+        },
+        "hrv_ms": {
+          "description": "Heart rate variability (rMSSD) in Ms.",
+          "type": "number",
+          "format": "float",
+          "x-go-name": "HeartRateVariabilityMS",
+          "example": 50
+        },
+        "ibi_ms": {
+          "description": "Inter Beat Interval in milliseconds.",
+          "type": "number",
+          "format": "float",
+          "x-go-name": "InterBeatIntervalMS",
+          "example": 25
+        },
+        "resp_rate_brpm": {
+          "description": "Respiratory Rate in breaths per minute(brpm).",
+          "type": "number",
+          "format": "float",
+          "x-go-name": "RespiratoryRateBRPM",
+          "example": 25
+        },
+        "spo2_pct": {
+          "description": "Arterial oxygen saturation.\nThe unit is the percentage of oxygenated haemoglobin in\na red blood cell.",
+          "type": "number",
+          "format": "float",
+          "x-go-name": "SpO2PCT",
+          "example": 98
+        },
+        "state": {
+          "description": "Describes whether this was an automated recording\nwhile the user was resting or sleeping, or if it was\ncaptured during an activity session including spot checks.\nPossible values are \"continuous\", \"passive\", \"daytime_passive\",\n\"daytime_continuous\", \"sleep_passive\", \"sleep_continuous\",\n\"activity_passive\", \"activity_continuous\".",
+          "type": "string",
+          "enum": [
+            "continuous",
+            "passive",
+            "daytime_passive",
+            "daytime_continuous",
+            "sleep_passive",
+            "sleep_continuous",
+            "activity_passive",
+            "activity_continuous"
+          ],
+          "x-go-name": "State",
+          "example": "continuous"
+        },
+        "timestamp_ms": {
+          "description": "Timestamp with millisecond precision.",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "TimestampMs",
+          "example": 1523905147000
+        },
+        "timezone_offset_mins": {
+          "description": "Timezone offset in minutes\nFor example if timezone is Pacific Standard Time, which is -07:00\ni.e 7 hours west of GMT, will be represented by -420 minutes.",
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "TimezoneOffsetMins",
+          "example": -420
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi/publicapimodels"
+    },
+    "TimeseriesBiometricsResponseBody": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TimeseriesBiometricsData"
+          },
+          "x-go-name": "Data"
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi"
+    },
+    "TimeseriesItem": {
+      "type": "object",
+      "properties": {
+        "date": {
+          "description": "Date in RFC3339 format",
+          "type": "string",
+          "x-go-name": "DateRFC33339",
+          "example": "2021-07-12"
+        },
+        "time": {
+          "description": "Time in RFC3339 format\n\nNOTE: If timeseries is based on granularity > day, Time field will not be present.",
+          "type": "string",
+          "x-go-name": "TimeRFC3339",
+          "example": "2021-07-12T12:34:51Z"
+        },
+        "value": {
+          "description": "Value is the actual value corresponding to the above Time or Date.",
+          "type": "number",
+          "format": "float",
+          "x-go-name": "Value",
+          "example": 2.3
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi/publicapimodels"
+    },
+    "UserDeviceInfo": {
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "battery_percentage": {
+          "description": "Latest Battery percentage left for the device.",
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "BatteryPercentage"
+        },
+        "last_battery_info_updated_at_ts": {
+          "description": "Last updated timestamp (with milisecond precision) for the battery information",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "LastBatteryInfoUpdatedAtTs"
+        },
+        "last_data_uploaded_at_ts": {
+          "description": "Last updated timestamp (with milisecond precision) for the data uploaded from this device.",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "LastDataUploadedAtTs"
+        },
+        "last_updated_at_tz_offset_mins": {
+          "description": "Timezone offset (in minutes format) when the device connected to our server.\nFor example, a timezone value of -7:00 will be returned as -420, i.e 420 minutes west of GMT\nThis timezone can be used to find the exact time for both the battery info and the data upload\nusing their respective timestamps receivied in the response.\nFor example, last_battery_info_updated_at_ts and last_updated_at_tz_offset_mins can\ntogether give you the last battery info updated at time.\nSimilarly, last_data_uploaded_at_ts and last_updated_at_tz_offset_mins can together\ngive you the last data uploaded at time.",
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "LastUpdatedAtTzOffsetMins"
+        },
+        "type": {
+          "description": "The type of the device.\nPossible device types are [\"wristband\", \"activity_pod\", \"heart_rate_monitor\", \"skin_temperature_sensor\", \"ethos_wristband\", \"ring\", \"alter_wristband\", \"kairos_wristband\"]",
+          "type": "string",
+          "enum": [
+            "wristband",
+            "activity_pod",
+            "heart_rate_monitor",
+            "skin_temperature_sensor",
+            "ethos_wristband",
+            "ring",
+            "alter_wristband",
+            "kairos_wristband"
+          ],
+          "x-go-name": "Type"
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi/publicapimodels"
+    },
+    "UserDeviceInfoResponseBody": {
+      "type": "object",
+      "properties": {
+        "devices": {
+          "description": "This list can be an empty list if there are no devices associated with the user, or the user has not linked/attached any device till now.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/UserDeviceInfo"
+          },
+          "x-go-name": "Devices"
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi"
+    },
+    "UserListResponseBody": {
+      "type": "object",
+      "properties": {
+        "pagination": {
+          "$ref": "#/definitions/PaginationResults"
+        },
+        "users": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/UserResponseData"
+          },
+          "x-go-name": "Users"
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi"
+    },
+    "UserNotFoundResponseBody": {
+      "type": "object",
+      "properties": {
+        "detail": {
+          "type": "string",
+          "x-go-name": "Detail"
+        },
+        "status": {
+          "description": "The HTTP status code for this error.",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Status"
+        },
+        "title": {
+          "type": "string",
+          "x-go-name": "Title"
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi"
+    },
+    "UserResponseBody": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "$ref": "#/definitions/UserResponseData"
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi"
+    },
+    "UserResponseData": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "email",
+        "birthday",
+        "gender",
+        "height",
+        "weight",
+        "goals"
+      ],
+      "properties": {
+        "birthday": {
+          "type": "string",
+          "x-go-name": "Birthday",
+          "example": "1986-02-08"
+        },
+        "email": {
+          "type": "string",
+          "x-go-name": "Email",
+          "example": "sameer@biostrap.com"
+        },
+        "gender": {
+          "description": "'male', 'female' or 'undisclosed'",
+          "type": "string",
+          "x-go-name": "Gender",
+          "example": "male"
+        },
+        "goals": {
+          "$ref": "#/definitions/Goals"
+        },
+        "height": {
+          "description": "In centimeters",
+          "type": "number",
+          "format": "float",
+          "x-go-name": "Height",
+          "example": 180
+        },
+        "id": {
+          "type": "string",
+          "x-go-name": "ID"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name",
+          "example": "Sameer Sontakey"
+        },
+        "photo_url": {
+          "description": "User photo URL",
+          "type": "string",
+          "x-go-name": "PhotoURL",
+          "example": "http://..."
+        },
+        "weight": {
+          "description": "In kilograms",
+          "type": "number",
+          "format": "float",
+          "x-go-name": "Weight",
+          "example": 66
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi"
+    },
+    "ValueUnitWrapper": {
+      "type": "object",
+      "properties": {
+        "unit": {
+          "type": "string",
+          "x-go-name": "Unit"
+        },
+        "value": {
+          "type": "number",
+          "format": "float",
+          "x-go-name": "Value"
+        },
+        "value_type": {
+          "type": "string",
+          "x-go-name": "ValueType"
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi/publicapimodels"
+    },
+    "WorkoutStats": {
+      "type": "object",
+      "properties": {
+        "activities": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Activity"
+          },
+          "x-go-name": "Activities"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "timestamp": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Timestamp"
+        }
+      },
+      "x-go-package": "biostrap/api/publicapi/publicapimodels"
+    }
+  },
+  "responses": {
+    "activitiesParameterErrorResponse": {
+      "description": "Parameter error",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/GenericParameterError"
+            },
+            "x-go-name": "Errors"
+          }
+        }
+      }
+    },
+    "activitiesResponse": {
+      "description": "A page of per-minute workout stats",
+      "schema": {
+        "$ref": "#/definitions/ActivitiesResponseBody"
+      }
+    },
+    "anonymousMonitoringInfoResponse": {
+      "description": "List of anonymous users you monitor.",
+      "schema": {
+        "$ref": "#/definitions/AnonymousMonitoringInfoResponseBody"
+      }
+    },
+    "biometricsResponse": {
+      "description": "A page of biometrics.",
+      "schema": {
+        "$ref": "#/definitions/BiometricsResponseBody"
+      }
+    },
+    "calorieDetailsParameterErrorResponse": {
+      "description": "Parameter error",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/GenericParameterError"
+            },
+            "x-go-name": "Errors"
+          }
+        }
+      }
+    },
+    "calorieDetailsResponse": {
+      "description": "Calorie Metric Details",
+      "schema": {
+        "$ref": "#/definitions/CalorieDetailsResponseBody"
+      }
+    },
+    "dailySleepDetailsParameterErrorResponse": {
+      "description": "Parameter error",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/GenericParameterError"
+            },
+            "x-go-name": "Errors"
+          }
+        }
+      }
+    },
+    "dailySleepDetailsResponse": {
+      "description": "Daily Sleep Details",
+      "schema": {
+        "$ref": "#/definitions/DailySleepDetailsResponseBody"
+      }
+    },
+    "genericParameterErrorResponse": {
+      "description": "Parameter error",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/GenericParameterError"
+            },
+            "x-go-name": "Errors"
+          }
+        }
+      }
+    },
+    "granularSleepDetailsParameterErrorResponse": {
+      "description": "Parameter error",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/GenericParameterError"
+            },
+            "x-go-name": "Errors"
+          }
+        }
+      }
+    },
+    "granularSleepDetailsResponse": {
+      "description": "Granular level Sleep Details",
+      "schema": {
+        "$ref": "#/definitions/GranularSleepDetailsResponseBody"
+      }
+    },
+    "insightsResponse": {
+      "description": "Insights for a given day.",
+      "schema": {
+        "$ref": "#/definitions/InsightsResponseBody"
+      }
+    },
+    "jobStatusResponse": {
+      "schema": {
+        "$ref": "#/definitions/JobStatusResponseBody"
+      }
+    },
+    "monitoringInfoResponse": {
+      "description": "List of users you monitor and their information.",
+      "schema": {
+        "$ref": "#/definitions/MonitoringInfoResponseBody"
+      }
+    },
+    "postLockUnlockDeviceToUserResponse": {
+      "description": "token to craft the deep link that will automatically log a user into the Biostrap App",
+      "schema": {
+        "$ref": "#/definitions/LockUnlockDeviceToUserResponseBody"
+      }
+    },
+    "postLoginQRCodeResponse": {
+      "description": "qr code which encapsulates a token which is used to log the user into the Biostrap Mobile App",
+      "schema": {
+        "$ref": "#/definitions/File"
+      }
+    },
+    "recoveryScoreDetailsParameterErrorResponse": {
+      "description": "Parameter error",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/GenericParameterError"
+            },
+            "x-go-name": "Errors"
+          }
+        }
+      }
+    },
+    "recoveryScoreDetailsResponse": {
+      "description": "Recovery Score Metric Details",
+      "schema": {
+        "$ref": "#/definitions/RecoveryScoreDetailsResponseBody"
+      }
+    },
+    "registerOrganizationUserResponse": {
+      "description": "user_id to query user information, and login_id to log the user with his password",
+      "schema": {
+        "$ref": "#/definitions/RegisterOrganizationUserResponseBody"
+      }
+    },
+    "requestLoginTokenResponse": {
+      "description": "token to craft the deep link that will automatically log a user into the Biostrap App",
+      "schema": {
+        "$ref": "#/definitions/LoginTokenResponseBody"
+      }
+    },
+    "requestRawDataDownloadResponse": {
+      "schema": {
+        "$ref": "#/definitions/RequestRawDataDownloadResponseBody"
+      }
+    },
+    "scoresResponse": {
+      "description": "Scores for a given day.",
+      "schema": {
+        "$ref": "#/definitions/ScoresResponseBody"
+      }
+    },
+    "sendInvitationResponse": {
+      "description": "List of emails invited to join the organization,\nnon existing Biostrap users are listed inside \"invited_to_create_account\"",
+      "schema": {
+        "$ref": "#/definitions/SendInvitationResponseBody"
+      }
+    },
+    "sleepStatsResponse": {
+      "description": "A list of sleep stats",
+      "schema": {
+        "$ref": "#/definitions/SleepStatsResponseBody"
+      }
+    },
+    "stepDetailsParameterErrorResponse": {
+      "description": "Parameter error",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/GenericParameterError"
+            },
+            "x-go-name": "Errors"
+          }
+        }
+      }
+    },
+    "stepDetailsResponse": {
+      "description": "Step Metric Details",
+      "schema": {
+        "$ref": "#/definitions/StepDetailsResponseBody"
+      }
+    },
+    "stepsParameterErrorResponse": {
+      "description": "Parameter error",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/GenericParameterError"
+            },
+            "x-go-name": "Errors"
+          }
+        }
+      }
+    },
+    "stepsResponse": {
+      "description": "A page of per-minute physical stats",
+      "schema": {
+        "$ref": "#/definitions/StepsResponseBody"
+      }
+    },
+    "timeseriesBiometricsResponse": {
+      "description": "A page of biometrics timeseries data.",
+      "schema": {
+        "$ref": "#/definitions/TimeseriesBiometricsResponseBody"
+      }
+    },
+    "userDeviceInfoResponse": {
+      "description": "List of devices with their information.",
+      "schema": {
+        "$ref": "#/definitions/UserDeviceInfoResponseBody"
+      }
+    },
+    "userListResponse": {
+      "description": "User profile",
+      "schema": {
+        "$ref": "#/definitions/UserListResponseBody"
+      }
+    },
+    "userNotFoundResponse": {
+      "description": "User not found",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/UserNotFoundResponseBody"
+            },
+            "x-go-name": "Errors"
+          }
+        }
+      }
+    },
+    "userResponse": {
+      "description": "User profile",
+      "schema": {
+        "$ref": "#/definitions/UserResponseBody"
+      }
+    }
+  },
+  "securityDefinitions": {
+    "applications oauth2": {
+      "type": "oauth2",
+      "flow": "accessCode",
+      "authorizationUrl": "https://auth.biostrap.com/authorize",
+      "tokenUrl": "https://auth.biostrap.com/token"
+    },
+    "organization apikey": {
+      "description": "To access the organization users data you can authenticate using an API Key (generated in our web dashboard https://app.biostrap.com) in the Authorization header like this, without the brackets <code>APIKey [your_api_key]</code>",
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header"
+    }
+  }
+}

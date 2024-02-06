@@ -1,0 +1,5 @@
+.health/
+*.pyc
+*.psql
+*.psql.bak
+*.pg_dump
