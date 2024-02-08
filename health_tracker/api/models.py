@@ -43,7 +43,7 @@ class UserList(models.Model):
     height = models.FloatField(verbose_name='Height (meters)', default=0.0)
     weight = models.FloatField(verbose_name='Weight (kgs)', default=0.0)
     blood_type = models
-    # bmi = models.ManyToManyField(BMI, related_name='userlists', blank=True)
+    bmi = models.ManyToManyField(BMI, related_name='userlists', blank=True)
 
     def calculate_bmi(self):
         
